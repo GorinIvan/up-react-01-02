@@ -1,0 +1,51 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS Roles (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Coupons (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  percent INTEGER NOT NULL CHECK (percent BETWEEN 1 AND 100)
+);
+
+CREATE TABLE IF NOT EXISTS Users (
+  id INTEGER PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  password_hash TEXT NOT NULL,
+  role_id INTEGER NOT NULL REFERENCES Roles(id),
+  coupon_id INTEGER REFERENCES Coupons(id)
+);
+
+CREATE TABLE IF NOT EXISTS Categories (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Services (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  duration INTEGER NOT NULL CHECK (duration > 0),
+  price INTEGER NOT NULL CHECK (price >= 0),
+  discount INTEGER NOT NULL DEFAULT 0 CHECK (discount BETWEEN 0 AND 100),
+  category_id INTEGER NOT NULL REFERENCES Categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS Appointments (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES Users(id),
+  service_id INTEGER NOT NULL REFERENCES Services(id),
+  starts_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new'
+);
+
+CREATE TABLE IF NOT EXISTS Payments (
+  id INTEGER PRIMARY KEY,
+  appointment_id INTEGER NOT NULL REFERENCES Appointments(id),
+  amount INTEGER NOT NULL CHECK (amount >= 0),
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,23 @@
+{
+  "name": "work-3",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5175 --strictPort",
+    "build": "vite build",
+    "dev:api": "node --env-file-if-exists=.env backend/server.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.8",
+    "@vitejs/plugin-react": "^5.1.0"
+  }
+}
