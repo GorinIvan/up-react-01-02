@@ -1,0 +1,6 @@
+.up-qa/
+node_modules/
+dist/
+.env
+*.sqlite*
+

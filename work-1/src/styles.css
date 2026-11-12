@@ -1,0 +1,12 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f3ef; color: #232923; font: 16px/1.5 Arial, sans-serif; }
+main { width: min(920px, 92%); margin: 40px auto; }
+h1 { font-size: 34px; margin: 0 0 24px; }
+h2 { font-size: 22px; margin: 16px 0 4px; }
+.products { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 16px; }
+article { background: white; border: 1px solid #deded5; border-radius: 12px; padding: 16px; }
+.product-image { display: grid; place-items: center; min-height: 125px; background: #e9efe6; border-radius: 8px; font-size: 58px; }
+.price { font-weight: bold; margin: 0 0 16px; }
+button { font: inherit; cursor: pointer; color: white; background: #305d49; border: 0; border-radius: 7px; padding: 8px 14px; }
+button:hover { background: #234635; }
+article p:last-child { margin: 10px 0 0; }
