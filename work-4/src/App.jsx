@@ -9,18 +9,10 @@ import { ActionError, RequestState } from './common.jsx';
 const currentRoute = () => location.hash.slice(1) || '/';
 const resetToken = new URLSearchParams(location.search).get('reset');
 
-function initialTheme() {
-  try {
-    return localStorage.getItem('sneaker-theme') === 'dark' ? 'dark' : 'light';
-  } catch {
-    return 'light';
-  }
-}
-
 // Навигация на хешах работает с кнопкой «Назад» и после перезагрузки страницы.
 export default function App() {
   const [route, setRoute] = useState(resetToken ? '/reset' : currentRoute);
-  const [theme, setTheme] = useState(initialTheme);
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme);
   const [message, notify] = useState('');
   const [returnRoute, setReturnRoute] = useState('');
   const [activeUser, setUser] = useState(undefined);
@@ -42,19 +34,21 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    try {
-      localStorage.setItem('sneaker-theme', theme);
-    } catch {
-      // Тема применяется в текущей вкладке даже при недоступном хранилище.
-    }
-  }, [theme]);
-
-  useEffect(() => {
     if (!message) return;
     const timer = setTimeout(() => notify(''), 6000);
     return () => clearTimeout(timer);
   }, [message]);
+
+  function toggleTheme() {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem('sneaker-theme', nextTheme);
+    } catch {
+      // Кнопка работает и при недоступном хранилище.
+    }
+  }
 
   function navigate(path) {
     if (location.hash === '#' + path) setRoute(path);
@@ -119,7 +113,7 @@ export default function App() {
 
   return <>
     <header className="topbar"><div className="header-inner">
-      <a href="#/" className="wordmark" aria-label="Sneaker Store — каталог"><span>S</span> Sneaker Store</a>
+      <a href="#/" className="wordmark" aria-label="Sneaker Store — каталог">Sneaker Store</a>
       <nav aria-label="Главная навигация">
         {links('/', 'Каталог')}
         {links('/cart', count ? 'Корзина (' + count + ')' : 'Корзина')}
@@ -127,8 +121,7 @@ export default function App() {
         {user?.role === 'admin' && links('/admin', 'Управление')}
       </nav>
       <div className="header-actions">
-        <button className="theme-button" aria-label={theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'}
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? '☾' : '☀'}</button>
+        <button type="button" onClick={toggleTheme}>{theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}</button>
         {user && <button onClick={logout} disabled={accountAction.busy}>{accountAction.busy ? 'Подождите…' : 'Выйти'}</button>}
       </div>
     </div></header>
@@ -147,7 +140,6 @@ export default function App() {
       {panel === 'admin' && user && user.role !== 'admin' && <p className="notice error">Раздел доступен администратору. <a href="#/">В каталог</a></p>}
       {route !== '/' && !panel && !authPage && !product && <p className="notice">Страница не найдена. <a href="#/">В каталог</a></p>}
     </main>
-    <footer><strong>Sneaker Store</strong><span>Интернет-магазин кроссовок</span></footer>
     {message && <aside className="toast" role="status">{message}<button aria-label="Закрыть уведомление" onClick={() => notify('')}>×</button></aside>}
   </>;
 }

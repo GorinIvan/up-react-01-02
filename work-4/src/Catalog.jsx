@@ -8,14 +8,16 @@ function ProductCard({ product, addToCart, busy }) {
   return <article className="product-card">
     <a className="product-photo" aria-label={'Подробнее о ' + product.name} href={'#/product/' + product.sku}>
       <ShoeImage product={product} />
-      {product.discount > 0 && <span className="sale">−{product.discount}%</span>}
     </a>
     <div className="product-body">
       <div className="product-meta"><span>{product.brand} · {product.categoryName}</span><span>{product.averageRating ? '★ ' + product.averageRating : ''}</span></div>
       <h3><a href={'#/product/' + product.sku}>{product.name}</a></h3>
       <p className="description">{product.description}</p>
       <p className="muted">Доставка от {product.deliveryDays} дн.</p>
-      <div className="price"><strong>{money(product.salePrice)}</strong>{product.discount > 0 && <del>{money(product.price)}</del>}</div>
+      <div className="price">
+        <strong>{money(product.salePrice)}</strong>
+        {product.discount > 0 && <><del>{money(product.price)}</del><small>−{product.discount}%</small></>}
+      </div>
       <div className="buy">
         <Field label="Размер"><select value={size} onChange={(event) => setSize(event.target.value)}>{sizes.map((value) => <option key={value}>{value}</option>)}</select></Field>
         <Field label="Пар" type="number" min="1" max="20" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
@@ -38,17 +40,8 @@ export function Catalog({ request, addToCart, action }) {
     (!price || item.salePrice <= Number(price)) &&
     [item.name, item.brand, item.description, item.categoryName, item.sku].some((value) => value.toLocaleLowerCase('ru-RU').includes(needle)));
   if (sort) products.sort((left, right) => (left.salePrice - right.salePrice) * (sort === 'asc' ? 1 : -1));
-  return <>
-    <section className="hero">
-      <div>
-        <h1>Кроссовки<br />на каждый день</h1>
-        <p>Городские, беговые и трейловые модели с доставкой.</p>
-        <button className="primary" onClick={() => document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' })}>Смотреть каталог</button>
-      </div>
-      <img src="/shoes/aero.webp" alt="Бело-голубые кроссовки Aero Run" />
-    </section>
-    <section id="catalog">
-      <div className="section-title"><h2>Каталог</h2>{request.data && <span className="muted">Найдено {products.length}</span>}</div>
+  return <section>
+      <h1>Каталог кроссовок</h1>
       <div className="filters">
         <Field label="Поиск" type="search" placeholder="Модель, бренд или артикул" maxLength="120" value={query} onChange={(event) => setQuery(event.target.value)} />
         <Field label="Категория"><select value={category} onChange={(event) => setCategory(event.target.value)}>
@@ -67,8 +60,7 @@ export function Catalog({ request, addToCart, action }) {
       {action.busy && <p className="notice" role="status">Добавляем в корзину…</p>}
       {request.data && !products.length && <p className="notice">По этим условиям кроссовки не найдены.</p>}
       <div className="products">{products.map((product) => <ProductCard key={product.sku} {...{ product, addToCart }} busy={action.busy} />)}</div>
-    </section>
-  </>;
+  </section>;
 }
 
 export function Product({ catalog, sku, user, addToCart, action, requestLogin, refreshCatalog, notify }) {
