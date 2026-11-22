@@ -3,11 +3,11 @@ import { BrowserRouter, Navigate, NavLink, Route, Routes, useNavigate } from 're
 import { ShopContext, ShopProvider } from './ShopContext';
 
 const products = [
-  { id: 1, name: 'Блокнот', price: 280 },
-  { id: 2, name: 'Карандаши', price: 350 },
-  { id: 3, name: 'Линейка', price: 120 },
-  { id: 4, name: 'Ручка', price: 90 },
-  { id: 5, name: 'Пенал', price: 490 },
+  { id: 1, name: 'Блокнот', price: 280, photo: 'notebook.jpg' },
+  { id: 2, name: 'Карандаши', price: 350, photo: 'pencils.jpg' },
+  { id: 3, name: 'Линейка', price: 120, photo: 'ruler.jpg' },
+  { id: 4, name: 'Ручка', price: 90, photo: 'pen.jpg' },
+  { id: 5, name: 'Пенал', price: 490, photo: 'case.jpg' },
 ];
 
 function Catalog() {
@@ -25,6 +25,7 @@ function Catalog() {
       <div className="grid">
         {products.map((product) => (
           <article key={product.id}>
+            <img className="product-photo" src={import.meta.env.BASE_URL + 'photos/' + product.photo} alt="" />
             <h2>{product.name}</h2>
             <p>{product.price} ₽</p>
             <button onClick={() => handleAdd(product)}>В корзину</button>
@@ -36,7 +37,7 @@ function Catalog() {
 }
 
 function Cart() {
-  const { cart, removeProduct } = useContext(ShopContext);
+  const { cart, addProduct, decreaseProduct, removeProduct } = useContext(ShopContext);
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
@@ -49,7 +50,12 @@ function Cart() {
             <h2>{item.name}</h2>
             <p>{item.price} ₽ × {item.quantity} шт. = {item.price * item.quantity} ₽</p>
           </div>
-          <button onClick={() => removeProduct(item.id)}>Удалить</button>
+          <div className="cart-actions">
+            <button aria-label={'Уменьшить количество: ' + item.name} onClick={() => decreaseProduct(item.id)}>−</button>
+            <span className="cart-quantity" aria-live="polite">{item.quantity}</span>
+            <button aria-label={'Увеличить количество: ' + item.name} onClick={() => addProduct(item)}>+</button>
+            <button onClick={() => removeProduct(item.id)}>Удалить</button>
+          </div>
         </article>
       ))}
       <p className="total">Итого: {total} ₽</p>

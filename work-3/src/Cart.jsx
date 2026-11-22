@@ -1,6 +1,6 @@
 import { discountedPrice, rubles } from './prices';
 
-export default function Cart({ cart, services, user, onRemove }) {
+export default function Cart({ cart, services, user, onChangeQuantity, onRemove }) {
   const items = services
     .filter((service) => cart[service.id] > 0)
     .map((service) => {
@@ -22,11 +22,16 @@ export default function Cart({ cart, services, user, onRemove }) {
             <h2>{item.name}</h2>
             <p>{rubles(item.unitPrice)} × {item.quantity} шт. = {rubles(item.unitPrice * item.quantity)}</p>
           </div>
-          <button onClick={() => onRemove(item.id)}>Удалить</button>
+          <div className="cart-actions">
+            <button aria-label={'Уменьшить количество: ' + item.name} onClick={() => onChangeQuantity(item.id, -1)}>−</button>
+            <span className="cart-quantity" aria-live="polite">{item.quantity}</span>
+            <button aria-label={'Увеличить количество: ' + item.name} onClick={() => onChangeQuantity(item.id, 1)}>+</button>
+            <button onClick={() => onRemove(item.id)}>Удалить</button>
+          </div>
         </article>
       ))}
       <div className="summary">
-        <p>Сумма услуг: {rubles(subtotal)}</p>
+        <p>Сумма за игры: {rubles(subtotal)}</p>
         {percent > 0 && <p>Купон «{user.couponName}» ({percent}%): −{rubles(subtotal - total)}</p>}
         <p className="total">Итого: {rubles(total)}</p>
       </div>

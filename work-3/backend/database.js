@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 
 export const db = new DatabaseSync(
-  process.env.DB_FILE || fileURLToPath(new URL('./salon.sqlite', import.meta.url))
+  process.env.DB_FILE || fileURLToPath(new URL('./games.sqlite', import.meta.url))
 );
 
 for (const filename of ['schema.sql', 'seed.sql']) {
@@ -21,9 +21,9 @@ export function checkPassword(password, stored) {
 }
 
 const demoUsers = [
-  ['admin@salon.test', 'admin123', 1, null],
-  ['client@salon.test', 'client123', 2, 2],
-  ['guest@salon.test', 'guest123', 2, 1],
+  ['admin@games.test', 'admin123', 1, null],
+  ['client@games.test', 'client123', 2, 2],
+  ['guest@games.test', 'guest123', 2, 1],
 ];
 
 for (const [email, password, role, coupon] of demoUsers) {

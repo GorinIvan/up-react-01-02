@@ -72,12 +72,12 @@ app.get('/api/admin/options', (req, res) => {
 app.post('/api/admin/categories', (req, res) => {
   const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
   if (!name || name.length > 50) {
-    return res.status(400).json({ error: 'Название категории должно содержать от 1 до 50 символов.' });
+    return res.status(400).json({ error: 'Название жанра должно содержать от 1 до 50 символов.' });
   }
 
   const categories = db.prepare('SELECT name FROM Categories').all();
   if (categories.some((category) => category.name.toLowerCase() === name.toLowerCase())) {
-    return res.status(409).json({ error: 'Такая категория уже есть.' });
+    return res.status(409).json({ error: 'Такой жанр уже есть.' });
   }
 
   const result = db.prepare('INSERT INTO Categories (name) VALUES (?)').run(name);
@@ -108,7 +108,7 @@ app.patch('/api/admin/services/:id/discount', (req, res) => {
   const result = db.prepare('UPDATE Services SET discount = ? WHERE id = ?')
     .run(percent, Number(req.params.id));
 
-  if (!result.changes) return res.status(404).json({ error: 'Услуга не найдена.' });
+  if (!result.changes) return res.status(404).json({ error: 'Игра не найдена.' });
   res.json({ ok: true });
 });
 
@@ -123,5 +123,5 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(port, '127.0.0.1', () => {
-  console.log('API салона: http://127.0.0.1:' + port + '/api/catalog');
+  console.log('API магазина игр: http://127.0.0.1:' + port + '/api/catalog');
 });

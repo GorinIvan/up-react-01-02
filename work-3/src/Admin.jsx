@@ -7,10 +7,15 @@ export default function Admin({ token, services, onCatalogChange }) {
   const [userId, setUserId] = useState('');
   const [couponId, setCouponId] = useState('');
   const [serviceId, setServiceId] = useState('');
+  const [gameSearch, setGameSearch] = useState('');
   const [discount, setDiscount] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const query = gameSearch.trim().toLowerCase();
+  const matches = query && !serviceId
+    ? services.filter((service) => service.name.toLowerCase().includes(query))
+    : [];
 
   useEffect(() => {
     request('/admin/options', { token }).then(setOptions).catch((failure) => setError(failure.message));
@@ -43,10 +48,10 @@ export default function Admin({ token, services, onCatalogChange }) {
           <form className="panel" onSubmit={(event) => save(event, '/categories', 'POST', { name: category }, async () => {
             setCategory('');
             await onCatalogChange();
-          }, 'Категория добавлена.')}>
-            <h2>Новая категория</h2>
+          }, 'Жанр добавлен.')}>
+            <h2>Новый жанр</h2>
             <label>Название <input value={category} onChange={(event) => setCategory(event.target.value)} required maxLength="50" /></label>
-            <button disabled={busy}>Добавить категорию</button>
+            <button disabled={busy}>Добавить жанр</button>
           </form>
           <form className="panel" onSubmit={(event) => save(event, '/users/' + userId + '/coupon', 'PATCH',
             { couponId: Number(couponId) }, () => {
@@ -80,18 +85,30 @@ export default function Admin({ token, services, onCatalogChange }) {
           <form className="panel" onSubmit={(event) => save(event, '/services/' + serviceId + '/discount', 'PATCH',
             { percent: Number(discount) }, onCatalogChange, 'Скидка сохранена.')}>
             <h2>Общая скидка</h2>
-            <label>Услуга
-              <select value={serviceId} required onChange={(event) => {
-                setServiceId(event.target.value);
-                setDiscount(services.find((service) => service.id === Number(event.target.value))?.discount ?? '');
-              }}>
-                <option value="">Выберите услугу</option>
-                {services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}
-              </select>
+            <label>Поиск игры
+              <input type="search" value={gameSearch} onChange={(event) => {
+                setGameSearch(event.target.value);
+                setServiceId('');
+                setDiscount('');
+              }} />
             </label>
+            {matches.length > 0 && (
+              <ul className="game-matches" aria-label="Найденные игры">
+                {matches.map((service) => (
+                  <li key={service.id}>
+                    <button type="button" onClick={() => {
+                      setGameSearch(service.name);
+                      setServiceId(service.id);
+                      setDiscount(service.discount);
+                    }}>{service.name}</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {query && !serviceId && matches.length === 0 && <p role="status">Игры не найдены.</p>}
             <label>Скидка, % <input type="number" min="0" max="100" step="1" required value={discount}
               onChange={(event) => setDiscount(event.target.value)} /></label>
-            <button disabled={busy}>Сохранить скидку</button>
+            <button disabled={busy || !serviceId}>Сохранить скидку</button>
           </form>
         </div>
       )}

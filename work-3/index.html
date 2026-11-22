@@ -1,9 +1,21 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Салон красоты</title>
+    <script>
+      // Устанавливаем тему до первой отрисовки страницы.
+      try {
+        if (localStorage.getItem('work-3-theme') === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch {}
+    </script>
+    <style>
+      :root { --page-bg: #f3f5f8; background: var(--page-bg); color-scheme: light; }
+      :root[data-theme="dark"] { --page-bg: #101925; color-scheme: dark; }
+    </style>
+    <title>Магазин видеоигр</title>
   </head>
   <body>
     <div id="root"></div>

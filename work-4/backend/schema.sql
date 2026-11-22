@@ -1,0 +1,98 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS roles (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+INSERT OR IGNORE INTO roles (name) VALUES ('user'), ('admin');
+
+CREATE TABLE IF NOT EXISTS coupons (
+  id INTEGER PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  percent INTEGER NOT NULL CHECK (percent BETWEEN 1 AND 90)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  role_id INTEGER NOT NULL REFERENCES roles(id),
+  coupon_id INTEGER REFERENCES coupons(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  phone TEXT NOT NULL,
+  address TEXT NOT NULL DEFAULT '',
+  password_hash TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+  id INTEGER PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY,
+  category_id INTEGER NOT NULL REFERENCES categories(id),
+  sku TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  brand TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image TEXT NOT NULL DEFAULT '',
+  price INTEGER NOT NULL CHECK (price > 0),
+  discount INTEGER NOT NULL DEFAULT 0 CHECK (discount BETWEEN 0 AND 90),
+  delivery_days INTEGER NOT NULL CHECK (delivery_days BETWEEN 1 AND 60)
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+  token TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  expires INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cart (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  size INTEGER NOT NULL CHECK (size BETWEEN 36 AND 46),
+  quantity INTEGER NOT NULL CHECK (quantity BETWEEN 1 AND 20),
+  PRIMARY KEY (user_id, product_id, size)
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  number TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  delivery_date TEXT NOT NULL,
+  address TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'shipping', 'delivered', 'cancelled')),
+  subtotal INTEGER NOT NULL,
+  total INTEGER NOT NULL,
+  coupon_code TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id INTEGER PRIMARY KEY,
+  order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
+  sku TEXT NOT NULL,
+  name TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  quantity INTEGER NOT NULL,
+  unit_price INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, product_id)
+);
